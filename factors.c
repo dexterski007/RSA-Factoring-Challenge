@@ -4,8 +4,8 @@
 #include <math.h>
 
 typedef struct {
-    long long prime;
-    int power;
+    long long prime1;
+    long long prime2;
 } Factor;
 
 bool is_prime(long long n) {
@@ -18,34 +18,29 @@ bool is_prime(long long n) {
     return true;
 }
 
-void factorize(long long n, Factor factors[], int* num_factors) {
-    *num_factors = 0;
-    if (n <= 1) return;
+void factorize(long long n, Factor* factors) {
+    long long factor1 = -1, factor2 = -1;
 
-    // Factorization using trial division
     for (long long i = 2; i * i <= n; i++) {
         while (n % i == 0) {
-            if (*num_factors < 2) {
-                factors[*num_factors].prime = i;
-                factors[*num_factors].power = 1;
-                (*num_factors)++;
+            if (factor1 == -1) {
+                factor1 = i;
+            } else if (factor2 == -1) {
+                factor2 = i;
             } else {
-                factors[0].power *= factors[1].prime;
-                factors[1] = factors[*num_factors - 1];
-                (*num_factors)--;
+                factor1 *= factor2;
+                factor2 = i;
             }
             n /= i;
         }
     }
-    if (n > 1) {
-        if (*num_factors < 2) {
-            factors[*num_factors].prime = n;
-            factors[*num_factors].power = 1;
-            (*num_factors)++;
-        } else {
-            factors[0].power *= factors[1].prime;
-            factors[1].prime = n;
-        }
+
+    if (factor1 == -1 || factor2 == -1) {
+        factors->prime1 = n;
+        factors->prime2 = 1;
+    } else {
+        factors->prime1 = factor1;
+        factors->prime2 = factor2;
     }
 }
 
@@ -63,19 +58,16 @@ int main(int argc, char* argv[]) {
 
     long long number;
     while (fscanf(file, "%lld", &number) != EOF) {
-        Factor factors[2];
-        int num_factors;
+        Factor factors;
 
-        factorize(number, factors, &num_factors);
+        factorize(number, &factors);
 
-        printf("%lld=", number);
-        for (int i = 0; i < num_factors; i++) {
-            printf("%lld", factors[i].prime);
-            if (i < num_factors - 1) {
-                printf("*");
-            }
+        if (is_prime(factors.prime1) && is_prime(factors.prime2)) {
+            printf("%lld=%lld*%lld\n", number, factors.prime1, factors.prime2);
+        } else {
+            printf("%lld=%lld*1\n", number, factors.prime1);
+            printf("%lld=%lld*1\n", number, factors.prime2);
         }
-        printf("\n");
     }
 
     fclose(file);
