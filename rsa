@@ -3,7 +3,7 @@
 import sys
 import math
 
-def pollard_rho(n):
+def pollard(n):
     if n == 1:
         return []
     if n % 2 == 0:
@@ -19,7 +19,7 @@ def pollard_rho(n):
         d = math.gcd(abs(x - y), n)
 
     if d == n:
-        return []  # Failed to find factor, likely a prime number
+        return []
     else:
         return [d, n // d]
 
@@ -31,7 +31,7 @@ def main():
     try:
         with open(sys.argv[1], "r") as stream:
             number = int(stream.read().strip())
-            factors = pollard_rho(number)
+            factors = pollard(number)
             print(f"{number}={'*'.join(map(str, factors))}")
     except FileNotFoundError:
         print(f"File {sys.argv[1]} not found.")
