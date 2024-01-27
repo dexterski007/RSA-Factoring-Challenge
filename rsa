@@ -1,28 +1,41 @@
 #!/usr/bin/python3
 
 import sys
+import math
+
+def pollard_rho(n):
+    if n == 1:
+        return []
+    if n % 2 == 0:
+        return [2, n // 2]
+
+    def f(x):
+        return (x**2 + 1) % n
+
+    x, y, d = 2, 2, 1
+    while d == 1:
+        x = f(x)
+        y = f(f(y))
+        d = math.gcd(abs(x - y), n)
+
+    if d == n:
+        return []  # Failed to find factor, likely a prime number
+    else:
+        return [d, n // d]
 
 def main():
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <file>")
-        sys.exit(EXIT_FAILURE)
+        sys.exit(1)
 
     try:
         with open(sys.argv[1], "r") as stream:
-            for line in stream:
-                number = int(line.strip())
-                flag = 1
-                div = 2
-                while flag:
-                    rest = number % div
-                    if rest == 0:
-                        counter = number // div
-                        print(f"{number}={counter}*{div}")
-                        flag = 0
-                    div += 1
+            number = int(stream.read().strip())
+            factors = pollard_rho(number)
+            print(f"{number}={'*'.join(map(str, factors))}")
     except FileNotFoundError:
         print(f"File {sys.argv[1]} not found.")
-        sys.exit(EXIT_FAILURE)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
